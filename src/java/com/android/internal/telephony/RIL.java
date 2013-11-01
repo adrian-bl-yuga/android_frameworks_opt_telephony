@@ -76,6 +76,7 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Random;
+import java.util.HashMap;
 
 /**
  * {@hide}
@@ -3356,18 +3357,25 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     private Object
     responseOperatorInfos(Parcel p) {
+        String ddkey = "";
         String strings[] = (String [])responseStrings(p);
         ArrayList<OperatorInfo> ret;
+        HashMap<String, Boolean> ddmap = new HashMap<String, Boolean>();
 
-        if (strings.length % 4 != 0) {
+        if (strings.length % 5 != 0) {
             throw new RuntimeException(
                 "RIL_REQUEST_QUERY_AVAILABLE_NETWORKS: invalid response. Got "
-                + strings.length + " strings, expected multible of 4");
+                + strings.length + " strings, expected multiple of 5");
         }
 
-        ret = new ArrayList<OperatorInfo>(strings.length / 4);
+        ret = new ArrayList<OperatorInfo>(strings.length / 5);
 
-        for (int i = 0 ; i < strings.length ; i += 4) {
+        for (int i = 0 ; i < strings.length ; i += 5) {
+            ddkey = "";
+            for(int j=0;j<3;j++) { ddkey = ddkey+"/"+strings[i+j]; }
+            if(ddmap.containsKey(ddkey)) { continue; }
+            ddmap.put(ddkey, true);
+
             ret.add (
                 new OperatorInfo(
                     strings[i+0],
